@@ -11,7 +11,7 @@ Based on this, we propose a bounded spiking neuron to build the discontinuous de
 ## Usage
 
 #### Data Convention
-The data is organized as follows:
+The DTU data is organized as follows:
 
 ```
 <case_name>
@@ -23,6 +23,27 @@ The data is organized as follows:
 |-- mask
     |-- 000.png        # target mask each view (For unmasked setting, set all pixels as 255)
     |-- 001.png
+    ...
+```
+
+The Blender data is organized as follows:
+
+```
+<case_name>
+|-- transforms_train.json    # camera parameters
+|-- transforms_test.json    # camera parameters
+|-- transforms_val.json    # camera parameters
+|-- train
+    |-- r_00.png        # target image
+    |-- r_01.png
+    ...
+|-- test
+    |-- r_00.png        # target image
+    |-- r_01.png
+    ...
+|-- val
+    |-- r_00.png        # target image
+    |-- r_01.png
     ...
 ```
 
