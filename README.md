@@ -11,20 +11,6 @@ Based on this, we propose a bounded spiking neuron to build the discontinuous de
 ## Usage
 
 #### Data Convention
-The DTU data is organized as follows:
-
-```
-<case_name>
-|-- cameras_xxx.npz    # camera parameters
-|-- image
-    |-- 000.png        # target image for each view
-    |-- 001.png
-    ...
-|-- mask
-    |-- 000.png        # target mask each view (For unmasked setting, set all pixels as 255)
-    |-- 001.png
-    ...
-```
 
 The Blender data is organized as follows:
 
@@ -56,12 +42,6 @@ pip install -r requirements.txt
 ```
 
 ### Running
-
-- **Training DTU**
-
-```shell 
-python exp_runner.py --mode train --conf ./confs/womask.conf --case <case_name>
-```
 
 - **Training Blender**
 
