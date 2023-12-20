@@ -12,4 +12,4 @@ N_rand = 1024
 half_res = False
 near = 2
 far = 6
-lambda_v = 0.1
+lambda_v = 0.05
