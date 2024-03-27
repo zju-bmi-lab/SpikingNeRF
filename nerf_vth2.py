@@ -511,7 +511,7 @@ def render_rays(ray_batch,
 
         if smooth:
             pts.requires_grad_(True)
-            y = network_query_fn(pts, viewdirs, network_fn)[..., 3:]
+            y = network_query_fn(pts, viewdirs, run_fn)[..., 3:]
             d_output = torch.ones_like(y, requires_grad=False, device=y.device)
             gradients = torch.autograd.grad(
                 outputs=y,
