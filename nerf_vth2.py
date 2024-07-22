@@ -1,21 +1,15 @@
-import math
 import os, sys
 import numpy as np
 import imageio
-import json
 import random
 import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
-from tqdm import tqdm, trange
-from spikingjelly.clock_driven import ann2snn
-import matplotlib.pyplot as plt
-import subprocess
+from torch.utils.data import Dataset
+from tqdm import tqdm
 from run_nerf_helpers_snn import *
 from datetime import datetime
-from dataset import Real_Dataset
 from load_llff import load_llff_data
 from load_deepvoxels import load_dv_data
 from load_blender import load_blender_data
@@ -278,7 +272,7 @@ def create_nerf(args):
 
     model.init()
     model = nn.DataParallel(model).to(device)
-    grad_vars = list(model.named_parameters())
+    grad_vars = list(model.parameters())
 
     model_fine = None
     if args.N_importance > 0:
@@ -288,7 +282,7 @@ def create_nerf(args):
 
         model_fine.init()
         model_fine = nn.DataParallel(model_fine).to(device)
-        grad_vars += list(model_fine.named_parameters())
+        grad_vars += list(model_fine.parameters())
 
     network_query_fn = lambda inputs, viewdirs, network_fn: run_network(inputs, viewdirs, network_fn,
                                                                         embed_fn=embed_fn,

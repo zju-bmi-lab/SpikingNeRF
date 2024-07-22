@@ -10,6 +10,13 @@ We conduct a comprehensive analysis for the problem of existing spiking neuron m
 Based on this, we propose a bounded spiking neuron to build the discontinuous density field.
 ## Usage
 
+### Download Data
+
+Download data for two example datasets: `lego` and `fern`
+```
+bash download_example_data.sh
+```
+
 #### Data Convention
 
 The Blender data is organized as follows:
@@ -46,5 +53,7 @@ pip install -r requirements.txt
 - **Training Blender**
 
 ```shell 
-python nerf_vth2.py --config ./config/xx.txt 
+python nerf_vth2.py --config ./configs/{DATASET}.txt 
 ```
+
+replace `{DATASET}` with `trex` | `horns` | `flower` | `fortress` | `lego` | etc.
