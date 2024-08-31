@@ -2,81 +2,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-from spikingjelly.clock_driven.ann2snn import modules
-from spikingjelly.clock_driven import neuron
-from spikingjelly.clock_driven import functional, surrogate
-from spikingjelly.clock_driven.neuron import BaseNode, IFNode, LIFNode
 # Misc
 img2mse = lambda x, y: torch.mean((x - y) ** 2)
 mse2psnr = lambda x: -10. * torch.log(x) / torch.log(torch.Tensor([10.]))
 to8b = lambda x: (255 * np.clip(x, 0, 1)).astype(np.uint8)
 
-class Embedder2:
-    def __init__(self, **kwargs):
-        self.kwargs = kwargs
-        self.create_embedding_fn()
-
-    def create_embedding_fn(self):
-        embed_fns = []
-        d = self.kwargs['input_dims']
-        out_dim = 0
-        if self.kwargs['include_input']:
-            embed_fns.append(lambda x: x)
-            out_dim += d
-
-        max_freq = self.kwargs['max_freq_log2']
-        N_freqs = self.kwargs['num_freqs']
-
-        if self.kwargs['log_sampling']:
-            freq_bands = 2. ** torch.linspace(0., max_freq, N_freqs)
-        else:
-            freq_bands = torch.linspace(2.**0., 2.**max_freq, N_freqs)
-
-        for freq in freq_bands:
-            for p_fn in self.kwargs['periodic_fns']:
-                embed_fns.append(lambda x, p_fn=p_fn, freq=freq: p_fn(x * freq))
-                out_dim += d
-
-        self.embed_fns = embed_fns
-        self.out_dim = out_dim
-
-    def embed(self, inputs):
-        return torch.cat([fn(inputs) for fn in self.embed_fns], -1)
-
-def get_embedder2(multires, input_dims=3):
-    embed_kwargs = {
-        'include_input': True,
-        'input_dims': input_dims,
-        'max_freq_log2': multires-1,
-        'num_freqs': multires,
-        'log_sampling': True,
-        'periodic_fns': [torch.sin, torch.cos],
-    }
-
-    embedder_obj = Embedder2(**embed_kwargs)
-    def embed(x, eo=embedder_obj): return eo.embed(x)
-    return embed, embedder_obj.out_dim
-
-class EdgePreservingSmoothnessLoss(nn.Module):
-    def __init__(self, opt=0):
-        super().__init__()
-        # self.opt = opt
-        self.patch_size = 4
-        self.gamma = 0.1
-        self.loss = lambda x: torch.mean(torch.abs(x))
-        self.bilateral_filter = lambda x: torch.exp(-torch.abs(x).sum(-1) / self.gamma)
-    
-    def forward(self, inputs, weights):
-        w1 = self.bilateral_filter(weights[:,:,:-1] - weights[:,:,1:])
-        w2 = self.bilateral_filter(weights[:,:-1,:] - weights[:,1:,:])
-        w3 = self.bilateral_filter(weights[:,:-1,:-1] - weights[:,1:,1:])
-        w4 = self.bilateral_filter(weights[:,1:,:-1] - weights[:,:-1,1:])
-
-        L1 = self.loss(w1 * (inputs[:,:,:-1] - inputs[:,:,1:]))
-        L2 = self.loss(w2 * (inputs[:,:-1,:] - inputs[:,1:,:]))
-        L3 = self.loss(w3 * (inputs[:,:-1,:-1] - inputs[:,1:,1:]))
-        L4 = self.loss(w4 * (inputs[:,1:,:-1] - inputs[:,:-1,1:]))
-        return (L1 + L2 + L3 + L4) / 4
 # Positional encoding (section 5.1)
 class Embedder:
     def __init__(self, **kwargs):
@@ -130,23 +60,6 @@ def get_embedder(multires, i=0):
     embed = lambda x, eo=embedder_obj: eo.embed(x)
     return embed, embedder_obj.out_dim
 
-
-def get_embedder_ex(multires, input_dims, i=0):
-    if i == -1:
-        return nn.Identity(), 3
-
-    embed_kwargs = {
-        'include_input': True,
-        'input_dims': input_dims,
-        'max_freq_log2': multires - 1,
-        'num_freqs': multires,
-        'log_sampling': True,
-        'periodic_fns': [torch.sin, torch.cos],
-    }
-
-    embedder_obj = Embedder(**embed_kwargs)
-    embed = lambda x, eo=embedder_obj: eo.embed(x)
-    return embed, embedder_obj.out_dim
 
 # Model
 class NeRF(nn.Module):
