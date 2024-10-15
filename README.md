@@ -46,5 +46,11 @@ pip install -r requirements.txt
 - **Training Blender**
 
 ```shell 
-python nerf_vth2.py --config ./config/xx.txt 
+python nerf_vth2.py --config ./configs/{DATASET}.txt 
+
 ```
+replace `{DATASET}` with `trex` | `horns` | `flower` | `fortress` | `lego` | etc.
+
+### Contributor
+
+[Zhanfeng Liao](https://liaozhanfeng.github.io/)
